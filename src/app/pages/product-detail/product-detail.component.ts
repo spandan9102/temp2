@@ -24,13 +24,19 @@ import { CartService } from '../../services/cart.service';
 						[alt]="product()!.name"
 						(error)="onImageError($event)"
 					/>
-					<span class="status-badge" [class.active]="product()!.status==='active'" [class.inactive]="product()!.status==='inactive'">
-						{{ product()!.status.toUpperCase() }}
-					</span>
 				</div>
 				
 				<div class="product-info">
-					<h1 class="product-title">{{ product()!.name }}</h1>
+					<div class="product-header">
+						<h1 class="product-title">{{ product()!.name }}</h1>
+						<div class="price-section">
+							<span class="price">{{ product()!.price | currency:'USD' }}</span>
+							<span class="stock-info" [class.in-stock]="product()!.stock > 0" [class.out-stock]="product()!.stock === 0">
+								{{ product()!.stock > 0 ? 'In Stock (' + product()!.stock + ')' : 'Out of Stock' }}
+							</span>
+						</div>
+					</div>
+					
 					<p class="product-description">{{ product()!.description }}</p>
 					
 					<!-- Brief Product Description -->
@@ -40,64 +46,56 @@ import { CartService } from '../../services/cart.service';
 					</div>
 					
 					<div class="product-meta">
-						<div class="meta-item">
-							<span class="label">Price:</span>
-							<span class="value price">{{ product()!.price | currency:'USD' }}</span>
-						</div>
-						<div class="meta-item">
-							<span class="label">Category:</span>
-							<span class="value">{{ product()!.category }}</span>
-						</div>
-						<div class="meta-item">
-							<span class="label">Stock:</span>
-							<span class="value" [class.in-stock]="product()!.stock > 0" [class.out-stock]="product()!.stock === 0">
-								{{ product()!.stock }} {{ product()!.stock > 0 ? '(In Stock)' : '(Out of Stock)' }}
-							</span>
+						<div class="meta-chip">
+							<span class="meta-label">Category</span>
+							<span class="meta-value">{{ product()!.category }}</span>
 						</div>
 					</div>
 					
-					<!-- Quantity Controls (only shown after adding to cart) -->
-					<div class="quantity-section" *ngIf="isInCart() && product()!.stock > 0">
-						<label class="quantity-label">Quantity:</label>
-						<div class="quantity-controls">
+					<div class="purchase-section">
+						<!-- Quantity Controls (only shown after adding to cart) -->
+						<div class="quantity-section" *ngIf="isInCart() && product()!.stock > 0">
+							<label class="quantity-label">Quantity:</label>
+							<div class="quantity-controls">
+								<button 
+									class="quantity-btn" 
+									(click)="decreaseQuantity()" 
+									type="button">
+									−
+								</button>
+								<span class="quantity-display">{{ quantity() }}</span>
+								<button 
+									class="quantity-btn" 
+									(click)="increaseQuantity()" 
+									[disabled]="quantity() >= product()!.stock"
+									type="button">
+									+
+								</button>
+							</div>
+						</div>
+						
+						<div class="actions">
+							<!-- Show Add to Cart initially -->
 							<button 
-								class="quantity-btn" 
-								(click)="decreaseQuantity()" 
-								type="button">
-								−
+								*ngIf="!isInCart()"
+								class="add-to-cart-btn" 
+								[disabled]="product()!.stock === 0"
+								(click)="addToCart()">
+								{{ product()!.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
 							</button>
-							<span class="quantity-display">{{ quantity() }}</span>
+							
+							<!-- Show Continue Shopping after adding to cart -->
 							<button 
-								class="quantity-btn" 
-								(click)="increaseQuantity()" 
-								[disabled]="quantity() >= product()!.stock"
-								type="button">
-								+
+								*ngIf="isInCart()"
+								class="continue-shopping-btn"
+								(click)="goBack()">
+								← Continue Shopping
+							</button>
+							
+							<button class="wishlist-btn" [class.in-wishlist]="isInWishlist()" (click)="addToWishlist()">
+								{{ isInWishlist() ? '♥' : '♡' }}
 							</button>
 						</div>
-					</div>
-					
-					<div class="actions">
-						<!-- Show Add to Cart initially -->
-						<button 
-							*ngIf="!isInCart()"
-							class="add-to-cart-btn" 
-							[disabled]="product()!.stock === 0"
-							(click)="addToCart()">
-							{{ product()!.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
-						</button>
-						
-						<!-- Show Continue Shopping after adding to cart -->
-						<button 
-							*ngIf="isInCart()"
-							class="continue-shopping-btn"
-							(click)="goBack()">
-							← Continue Shopping
-						</button>
-						
-						<button class="wishlist-btn" [class.in-wishlist]="isInWishlist()" (click)="addToWishlist()">
-							{{ isInWishlist() ? '♥ Remove from Wishlist' : '♡ Add to Wishlist' }}
-						</button>
 					</div>
 				</div>
 			</div>
@@ -120,28 +118,37 @@ import { CartService } from '../../services/cart.service';
 	`,
 	styles: [`
 		.product-detail-container {
-			width: 100%;
-			min-height: 100vh;
-			padding: 24px;
-			max-width: 1400px;
+			max-width: 1000px;
 			margin: 0 auto;
+			padding: 20px;
+			min-height: calc(100vh - 60px);
+			overflow-y: auto;
+			/* Hide scrollbar while maintaining scroll functionality */
+			scrollbar-width: none; /* Firefox */
+			-ms-overflow-style: none; /* IE and Edge */
+		}
+		
+		/* Hide scrollbar for Chrome, Safari and Opera */
+		.product-detail-container::-webkit-scrollbar {
+			display: none;
 		}
 		
 		.back-button {
-			margin-bottom: 32px;
+			margin-bottom: 20px;
 		}
 		
 		.back-btn {
 			display: inline-flex;
 			align-items: center;
-			gap: 8px;
-			padding: 12px 20px;
+			gap: 6px;
+			padding: 8px 16px;
 			background: #f8fafc;
 			border: 1px solid #e2e8f0;
-			border-radius: 8px;
+			border-radius: 6px;
 			color: #475569;
 			cursor: pointer;
 			font-weight: 500;
+			font-size: 14px;
 			transition: all 0.2s;
 		}
 		
@@ -152,23 +159,21 @@ import { CartService } from '../../services/cart.service';
 		
 		.product-detail {
 			display: grid;
-			grid-template-columns: 1fr 1.2fr;
-			gap: 40px;
+			grid-template-columns: 400px 1fr;
+			gap: 32px;
 			background: white;
-			border-radius: 16px;
-			padding: 40px;
-			box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-			max-width: 1200px;
-			margin: 0 auto;
+			border-radius: 12px;
+			padding: 24px;
+			box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
 		}
 		
 		.product-image {
 			position: relative;
-			border-radius: 12px;
+			border-radius: 8px;
 			overflow: hidden;
-			background: #f1f5f9;
+			background: #f8fafc;
 			aspect-ratio: 1;
-			max-height: 500px;
+			height: 400px;
 		}
 		
 		.product-image img {
@@ -179,128 +184,131 @@ import { CartService } from '../../services/cart.service';
 		}
 		
 		.product-image:hover img {
-			transform: scale(1.05);
+			transform: scale(1.03);
 		}
 		
-		.status-badge {
-			position: absolute;
-			top: 16px;
-			right: 16px;
-			padding: 6px 12px;
-			border-radius: 999px;
-			font-size: 12px;
-			font-weight: 600;
-			color: white;
-		}
-		
-		.status-badge.active {
-			background: #22c55e;
-		}
-		
-		.status-badge.inactive {
-			background: #9ca3af;
-		}
+
 		
 		.product-info {
 			display: flex;
 			flex-direction: column;
+			gap: 20px;
+		}
+		
+		.product-header {
+			border-bottom: 1px solid #f1f5f9;
+			padding-bottom: 16px;
 		}
 		
 		.product-title {
-			font-size: 32px;
+			font-size: 24px;
 			font-weight: 700;
 			color: #1f2937;
-			margin: 0 0 16px 0;
-			line-height: 1.2;
+			margin: 0 0 12px 0;
+			line-height: 1.3;
 		}
 		
-		.product-description {
-			font-size: 18px;
-			color: #6b7280;
-			line-height: 1.6;
-			margin: 0 0 32px 0;
-		}
-		
-		.product-brief {
-			margin-bottom: 32px;
-			padding: 24px;
-			background: #f8fafc;
-			border-radius: 12px;
-			border: 1px solid #e2e8f0;
-		}
-
-		.product-brief h3 {
-			font-size: 20px;
-			font-weight: 600;
-			color: #1f2937;
-			margin-bottom: 16px;
-			border-bottom: 1px solid #e2e8f0;
-			padding-bottom: 12px;
-		}
-
-		.product-brief p {
-			font-size: 16px;
-			color: #475569;
-			line-height: 1.6;
-		}
-		
-		.product-meta {
-			display: grid;
-			gap: 16px;
-			margin-bottom: 32px;
-		}
-		
-		.meta-item {
+		.price-section {
 			display: flex;
-			justify-content: space-between;
 			align-items: center;
-			padding: 12px 0;
-			border-bottom: 1px solid #f1f5f9;
+			gap: 16px;
 		}
 		
-		.meta-item:last-child {
-			border-bottom: none;
-		}
-		
-		.label {
-			font-weight: 500;
-			color: #374151;
-			font-size: 16px;
-		}
-		
-		.value {
-			font-weight: 600;
-			color: #1f2937;
-			font-size: 16px;
-		}
-		
-		.value.price {
-			font-size: 24px;
+		.price {
+			font-size: 28px;
+			font-weight: 700;
 			color: #059669;
 		}
 		
-		.value.in-stock {
+		.stock-info {
+			padding: 4px 12px;
+			border-radius: 16px;
+			font-size: 12px;
+			font-weight: 600;
+		}
+		
+		.stock-info.in-stock {
+			background: #dcfce7;
 			color: #16a34a;
 		}
 		
-		.value.out-stock {
-			color: #ef4444;
+		.stock-info.out-stock {
+			background: #fee2e2;
+			color: #dc2626;
+		}
+		
+		.product-description {
+			font-size: 16px;
+			color: #6b7280;
+			line-height: 1.6;
+			margin: 0;
+		}
+		
+		.product-brief {
+			padding: 16px;
+			background: #f8fafc;
+			border-radius: 8px;
+			border-left: 4px solid #2563eb;
+		}
+
+		.product-brief h3 {
+			font-size: 16px;
+			font-weight: 600;
+			color: #1f2937;
+			margin: 0 0 8px 0;
+		}
+
+		.product-brief p {
+			font-size: 14px;
+			color: #475569;
+			line-height: 1.5;
+			margin: 0;
+		}
+		
+		.product-meta {
+			display: flex;
+			gap: 12px;
+			flex-wrap: wrap;
+		}
+		
+		.meta-chip {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 6px 12px;
+			background: #f1f5f9;
+			border-radius: 16px;
+			border: 1px solid #e2e8f0;
+		}
+		
+		.meta-label {
+			font-size: 12px;
+			color: #6b7280;
+			font-weight: 500;
+		}
+		
+		.meta-value {
+			font-size: 12px;
+			color: #1f2937;
+			font-weight: 600;
+		}
+		
+		.purchase-section {
+			margin-top: auto;
+			padding-top: 16px;
+			border-top: 1px solid #f1f5f9;
 		}
 		
 		/* Quantity Controls */
 		.quantity-section {
-			margin-bottom: 24px;
-			padding: 12px 16px;
-			background: #f8fafc;
-			border-radius: 8px;
-			border: 1px solid #e2e8f0;
+			margin-bottom: 16px;
 			display: inline-block;
 		}
 		
 		.quantity-label {
 			display: block;
-			margin-bottom: 8px;
-			font-size: 13px;
+			margin-bottom: 6px;
+			font-size: 12px;
 			font-weight: 500;
 			color: #374151;
 		}
@@ -309,12 +317,15 @@ import { CartService } from '../../services/cart.service';
 			display: flex;
 			align-items: center;
 			gap: 0;
+			border: 1px solid #e2e8f0;
+			border-radius: 6px;
+			overflow: hidden;
 		}
 		
 		.quantity-btn {
-			width: 28px;
-			height: 28px;
-			border: 1px solid #d1d5db;
+			width: 24px;
+			height: 24px;
+			border: none;
 			background: #fff;
 			color: #374151;
 			font-size: 12px;
@@ -324,14 +335,6 @@ import { CartService } from '../../services/cart.service';
 			display: flex;
 			align-items: center;
 			justify-content: center;
-		}
-		
-		.quantity-btn:first-child {
-			border-radius: 4px 0 0 4px;
-		}
-		
-		.quantity-btn:last-child {
-			border-radius: 0 4px 4px 0;
 		}
 		
 		.quantity-btn:hover:not(:disabled) {
@@ -346,10 +349,8 @@ import { CartService } from '../../services/cart.service';
 		}
 		
 		.quantity-display {
-			width: 40px;
-			height: 28px;
-			border-top: 1px solid #d1d5db;
-			border-bottom: 1px solid #d1d5db;
+			width: 32px;
+			height: 24px;
 			background: #fff;
 			display: flex;
 			align-items: center;
@@ -357,22 +358,23 @@ import { CartService } from '../../services/cart.service';
 			font-weight: 600;
 			color: #1f2937;
 			font-size: 12px;
+			border-left: 1px solid #e2e8f0;
+			border-right: 1px solid #e2e8f0;
 		}
 		
 		.actions {
 			display: flex;
-			gap: 16px;
-			margin-top: auto;
+			gap: 12px;
 		}
 		
 		.add-to-cart-btn {
 			flex: 1;
-			padding: 16px 24px;
+			padding: 12px 20px;
 			background: #2563eb;
 			color: white;
 			border: none;
-			border-radius: 12px;
-			font-size: 16px;
+			border-radius: 8px;
+			font-size: 14px;
 			font-weight: 600;
 			cursor: pointer;
 			transition: all 0.2s;
@@ -381,6 +383,7 @@ import { CartService } from '../../services/cart.service';
 		.add-to-cart-btn:hover:not(:disabled) {
 			background: #1d4ed8;
 			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 		}
 		
 		.add-to-cart-btn:disabled {
@@ -389,38 +392,42 @@ import { CartService } from '../../services/cart.service';
 		}
 
 		.continue-shopping-btn {
-			padding: 16px 24px;
-			background: #f8fafc;
-			color: #475569;
-			border: 1px solid #e2e8f0;
-			border-radius: 12px;
-			font-size: 16px;
-			font-weight: 500;
+			flex: 1;
+			padding: 12px 20px;
+			background: #059669;
+			color: white;
+			border: none;
+			border-radius: 8px;
+			font-size: 14px;
+			font-weight: 600;
 			cursor: pointer;
 			transition: all 0.2s;
 		}
 
 		.continue-shopping-btn:hover {
-			background: #e2e8f0;
-			color: #334155;
+			background: #047857;
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
 		}
 		
 		.wishlist-btn {
-			padding: 16px 24px;
+			padding: 12px 16px;
 			background: #f8fafc;
 			color: #475569;
 			border: 1px solid #e2e8f0;
-			border-radius: 12px;
-			font-size: 16px;
+			border-radius: 8px;
+			font-size: 14px;
 			font-weight: 500;
 			cursor: pointer;
 			transition: all 0.2s;
+			min-width: 44px;
 		}
 		
 		.wishlist-btn:hover {
 			background: #fce7f3;
 			color: #ec4899;
 			border-color: #ec4899;
+			transform: scale(1.05);
 		}
 		
 		.wishlist-btn.in-wishlist {
@@ -446,13 +453,13 @@ import { CartService } from '../../services/cart.service';
 		}
 		
 		.loading-spinner {
-			width: 40px;
-			height: 40px;
-			border: 4px solid #f3f4f6;
-			border-top: 4px solid #2563eb;
+			width: 32px;
+			height: 32px;
+			border: 3px solid #f3f4f6;
+			border-top: 3px solid #2563eb;
 			border-radius: 50%;
 			animation: spin 1s linear infinite;
-			margin-bottom: 16px;
+			margin-bottom: 12px;
 		}
 		
 		@keyframes spin {
@@ -462,18 +469,26 @@ import { CartService } from '../../services/cart.service';
 		
 		/* Responsive Design */
 		@media (max-width: 768px) {
+			.product-detail-container {
+				padding: 16px;
+			}
+			
 			.product-detail {
 				grid-template-columns: 1fr;
-				gap: 24px;
-				padding: 24px;
+				gap: 20px;
+				padding: 20px;
+			}
+			
+			.product-image {
+				height: 300px;
 			}
 			
 			.product-title {
-				font-size: 24px;
+				font-size: 20px;
 			}
 			
-			.product-description {
-				font-size: 16px;
+			.price {
+				font-size: 24px;
 			}
 			
 			.actions {
@@ -485,9 +500,15 @@ import { CartService } from '../../services/cart.service';
 			.wishlist-btn {
 				width: 100%;
 			}
+		}
+		
+		@media (max-width: 1024px) {
+			.product-detail {
+				grid-template-columns: 350px 1fr;
+			}
 			
-			.quantity-controls {
-				justify-content: center;
+			.product-image {
+				height: 350px;
 			}
 		}
 	`]

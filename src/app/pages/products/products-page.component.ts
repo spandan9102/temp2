@@ -99,10 +99,18 @@ import { ProductCardComponent } from '../../components/product-card/product-card
 			border-right: 1px solid #e5e7eb;
 			z-index: 1000;
 			overflow-y: auto;
+			/* Hide scrollbar while maintaining scroll functionality */
+			scrollbar-width: none; /* Firefox */
+			-ms-overflow-style: none; /* IE and Edge */
+		}
+		
+		/* Hide scrollbar for Chrome, Safari and Opera */
+		.filters-sidebar::-webkit-scrollbar {
+			display: none;
 		}
 		
 		.filters-content {
-			padding: 32px 24px 24px 24px;
+			padding: 100px 24px 24px 24px; /* Increased top padding to avoid header overlap */
 		}
 		
 		.filters-sidebar h3 {
@@ -170,8 +178,16 @@ import { ProductCardComponent } from '../../components/product-card/product-card
 		.scrollable-content {
 			flex: 1;
 			overflow-y: auto;
-			padding: 32px 24px 24px 24px;
+			padding: 100px 24px 24px 24px; /* Increased top padding to avoid header overlap */
 			background: #f8fafc;
+			/* Hide scrollbar while maintaining scroll functionality */
+			scrollbar-width: none; /* Firefox */
+			-ms-overflow-style: none; /* IE and Edge */
+		}
+		
+		/* Hide scrollbar for Chrome, Safari and Opera */
+		.scrollable-content::-webkit-scrollbar {
+			display: none;
 		}
 		
 		.grid {

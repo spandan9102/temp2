@@ -17,9 +17,6 @@ import { CartService } from '../../services/cart.service';
 					(error)="onImageError($event)"
 					loading="lazy"
 				/>
-				<span class="badge" [class.active]="product!.status==='active'" [class.inactive]="product!.status==='inactive'">
-					{{ product!.status.toUpperCase() }}
-				</span>
 			</div>
 			<div class="content">
 				<h3 class="name">{{ product!.name }}</h3>
@@ -126,19 +123,7 @@ import { CartService } from '../../services/cart.service';
 			opacity: 0.3;
 			z-index: 1;
 		}
-		.badge{
-			position:absolute;
-			top:12px;
-			right:12px;
-			padding:4px 10px;
-			border-radius:999px;
-			font-size:12px;
-			font-weight:600;
-			color:#fff;
-			z-index:2;
-		}
-		.badge.active{background:#22c55e}
-		.badge.inactive{background:#9ca3af}
+
 		.content{
 			padding:16px;
 			display:flex;

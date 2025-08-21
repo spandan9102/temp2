@@ -17,8 +17,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 		</main>
 	`,
 	styles: [`
-		:host{display:block;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#0f172a;background:#f8fafc;min-height:100vh}
-		.main-content{height:100vh;margin-top:60px}
+		:host{display:block;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#0f172a;background:#f8fafc;min-height:100vh;overflow:hidden}
+		.main-content{height:calc(100vh - 60px);overflow:hidden}
 		.top-nav{position:fixed;top:0;left:0;right:0;z-index:1001;background:#ffffffcc;backdrop-filter:saturate(1.2) blur(8px);display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid #e5e7eb;height:60px}
 		.brand{font-weight:700}
 		.nav-links a{margin-left:16px;text-decoration:none;color:#1f2937}
