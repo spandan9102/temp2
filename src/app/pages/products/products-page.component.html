@@ -1,0 +1,71 @@
+<div class="layout">
+	<!-- Fixed Filters Sidebar -->
+	<aside class="filters-sidebar">
+		<div class="filters-content">
+			<h3>Filters</h3>
+			<div class="filters-grid">
+				<div class="filter-group">
+					<label for="search">Search</label>
+					<input id="search" type="text" [(ngModel)]="filters.search" placeholder="Search products..." (input)="applyFilters()" />
+				</div>
+				<div class="filter-group">
+					<label for="category">Category</label>
+					<select id="category" [(ngModel)]="filters.category" (change)="applyFilters()">
+						<option value="">All Categories</option>
+						<option *ngFor="let category of categories()" [value]="category">{{ category }}</option>
+					</select>
+				</div>
+				<div class="filter-group">
+					<label for="minPrice">Min Price</label>
+					<input id="minPrice" type="number" [(ngModel)]="filters.minPrice" placeholder="0" (input)="applyFilters()" />
+				</div>
+				<div class="filter-group">
+					<label for="maxPrice">Max Price</label>
+					<input id="maxPrice" type="number" [(ngModel)]="filters.maxPrice" placeholder="1000" (input)="applyFilters()" />
+				</div>
+				<div class="filter-actions">
+					<button class="clear-btn" (click)="clearFilters()">Clear Filters</button>
+				</div>
+			</div>
+		</div>
+	</aside>
+
+	<!-- Scrollable Product Listing -->
+	<main class="content-area">
+		<div class="scrollable-content">
+			<div class="grid">
+				<app-product-card
+					*ngFor="let p of displayed()"
+					[product]="p"
+					(addToCart)="onAddToCart($event)"
+					(addToWishlist)="onAddToWishlist($event)"
+				></app-product-card>
+			</div>
+			
+			<!-- Pagination Controls -->
+			<div class="pagination" *ngIf="totalPages() > 1">
+				<button 
+					class="pagination-btn" 
+					[disabled]="currentPage() <= 1" 
+					(click)="goToPage(currentPage() - 1)">
+					Previous
+				</button>
+				
+				<button 
+					*ngFor="let page of getPageNumbers()" 
+					class="pagination-btn" 
+					[class.active]="page === currentPage()" 
+					(click)="goToPage(page)">
+					{{ page }}
+				</button>
+				
+				<button 
+					class="pagination-btn" 
+					[disabled]="currentPage() >= totalPages()" 
+					(click)="goToPage(currentPage() + 1)">
+					Next
+				</button>
+			</div>
+		</div>
+	</main>
+</div> 

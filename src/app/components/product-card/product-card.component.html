@@ -1,0 +1,58 @@
+<div class="card" [class.inactive]="product.status==='inactive'">
+	<div class="image-wrap">
+		<img 
+			[src]="product!.imageUrl" 
+			[alt]="product!.name"
+			(error)="onImageError($event)"
+			loading="lazy"
+		/>
+	</div>
+	<div class="content">
+		<h3 class="name">{{ product!.name }}</h3>
+		<p class="desc">{{ product!.description }}</p>
+		<div class="meta">
+			<div>
+				<div class="label">Price:</div>
+				<div class="value">{{ product!.price | currency:'USD' }}</div>
+			</div>
+			<div>
+				<div class="label">Category:</div>
+				<div class="value">{{ product!.category }}</div>
+			</div>
+			<div>
+				<div class="label">Stock:</div>
+				<div class="value" [class.in-stock]="product!.stock>0" [class.out-stock]="product!.stock===0">
+					{{ product!.stock }} {{ product!.stock>0 ? '(In Stock)' : '(Out of Stock)' }}
+				</div>
+			</div>
+		</div>
+		
+		<div class="actions">
+			<a [routerLink]="['/product', product!.id]" class="view-details-btn">View Details</a>
+			
+			<!-- Show Add to Cart initially -->
+			<button 
+				*ngIf="!isInCart()" 
+				class="add-to-cart-btn" 
+				(click)="addToCartWithQuantity()" 
+				[disabled]="product!.stock===0">
+				{{ product!.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
+			</button>
+			
+			<!-- Show quantity controls after adding to cart -->
+			<div class="quantity-controls" *ngIf="isInCart() && product!.stock > 0">
+				<button class="quantity-btn-minus" (click)="decreaseQuantity()">
+					−
+				</button>
+				<span class="quantity-display">{{ quantity() }}</span>
+				<button class="quantity-btn-plus" (click)="increaseQuantity()" [disabled]="quantity() >= product!.stock">
+					+
+				</button>
+			</div>
+			
+			<button class="wishlist-btn" [class.in-wishlist]="isInWishlist()" (click)="toggleWishlist()">
+				{{ isInWishlist() ? '♥' : '♡' }}
+			</button>
+		</div>
+	</div>
+</div> 
